@@ -32,6 +32,7 @@ Suggestions and other forms of feedback and concerns can either be posted as a G
 androidAPI.hideBannerAd();
 androidAPI.showBannerAd();
 androidAPI.showInterstitialAd();
+androidAPI.showRewardedAd();
 androidAPI.hideWebView();
 androidAPI.showWebView();
 ```
