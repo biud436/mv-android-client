@@ -94,8 +94,11 @@ public class WebPlayerActivity extends Activity {
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            WebView.setWebContentsDebuggingEnabled(true);
+        // Remote debugging...
+        if(BuildConfig.DEBUG && BuildConfig.REMOTE_DEBUGGING) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                WebView.setWebContentsDebuggingEnabled(true);
+            }
         }
 
         mPlayer = PlayerHelper.create(this);
@@ -114,6 +117,7 @@ public class WebPlayerActivity extends Activity {
         // Initialize AdMob.
         init();
 
+        // Reload Ads.
         loadAds();
 
     }

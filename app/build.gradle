@@ -26,6 +26,7 @@ android {
     def FORCE_CANVAS         = false // Disables fast WebGL rendering when available
     def FORCE_NO_AUDIO       = false // Disables WebAudio
     def LOAD_INTERSTITIAL_AD = false // 전면 광고 로드 여부
+    def REMOTE_DEBUGGING     = true // 원격 디버깅 여부.
 
     // Android 9+ "Q" API 29
     def ANDROID_SDK_TARGET  = 29
@@ -45,11 +46,12 @@ android {
 
     buildTypes {
         buildTypes.each { buildType ->
-            buildType.buildConfigField "boolean",  "BACK_BUTTON_QUITS", String.valueOf(BACK_BUTTON_QUITS)
-            buildType.buildConfigField "boolean",  "SHOW_FPS",          String.valueOf(SHOW_FPS)
-            buildType.buildConfigField "boolean",  "FORCE_CANVAS",      String.valueOf(FORCE_CANVAS)
-            buildType.buildConfigField "boolean",  "FORCE_NO_AUDIO",    String.valueOf(FORCE_NO_AUDIO)
-            buildType.buildConfigField "boolean",  "LOAD_INTERSTITIAL_AD",    String.valueOf(LOAD_INTERSTITIAL_AD)
+            buildType.buildConfigField "boolean",  "BACK_BUTTON_QUITS",     String.valueOf(BACK_BUTTON_QUITS)
+            buildType.buildConfigField "boolean",  "SHOW_FPS",              String.valueOf(SHOW_FPS)
+            buildType.buildConfigField "boolean",  "FORCE_CANVAS",          String.valueOf(FORCE_CANVAS)
+            buildType.buildConfigField "boolean",  "FORCE_NO_AUDIO",        String.valueOf(FORCE_NO_AUDIO)
+            buildType.buildConfigField "boolean",  "LOAD_INTERSTITIAL_AD",  String.valueOf(LOAD_INTERSTITIAL_AD)
+            buildType.buildConfigField "boolean",  "REMOTE_DEBUGGING",      String.valueOf(REMOTE_DEBUGGING)
         }
     }
 
