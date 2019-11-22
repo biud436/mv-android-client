@@ -21,10 +21,11 @@ android {
     /**
      * Advanced Configuration
      */
-    def BACK_BUTTON_QUITS   = true // Use back button to quit the app?
-    def SHOW_FPS            = false // Display the FPS monitor?
-    def FORCE_CANVAS        = false // Disables fast WebGL rendering when available
-    def FORCE_NO_AUDIO      = false // Disables WebAudio
+    def BACK_BUTTON_QUITS    = true // Use back button to quit the app?
+    def SHOW_FPS             = false // Display the FPS monitor?
+    def FORCE_CANVAS         = false // Disables fast WebGL rendering when available
+    def FORCE_NO_AUDIO       = false // Disables WebAudio
+    def LOAD_INTERSTITIAL_AD = false // 전면 광고 로드 여부
 
     // Android 9+ "Q" API 29
     def ANDROID_SDK_TARGET  = 29
@@ -48,6 +49,7 @@ android {
             buildType.buildConfigField "boolean",  "SHOW_FPS",          String.valueOf(SHOW_FPS)
             buildType.buildConfigField "boolean",  "FORCE_CANVAS",      String.valueOf(FORCE_CANVAS)
             buildType.buildConfigField "boolean",  "FORCE_NO_AUDIO",    String.valueOf(FORCE_NO_AUDIO)
+            buildType.buildConfigField "boolean",  "LOAD_INTERSTITIAL_AD",    String.valueOf(LOAD_INTERSTITIAL_AD)
         }
     }
 

@@ -189,9 +189,12 @@ public class WebPlayerActivity extends Activity {
         }
 
         // Reload the interstitial Ad.
-        if(!mInterstitialAd.isLoading() && !mInterstitialAd.isLoaded()) {
-            mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        if(BuildConfig.LOAD_INTERSTITIAL_AD) {
+            if(!mInterstitialAd.isLoading() && !mInterstitialAd.isLoaded()) {
+                mInterstitialAd.loadAd(new AdRequest.Builder().build());
+            }
         }
+
     }
 
     private void loadRewardedAd() {
@@ -208,7 +211,9 @@ public class WebPlayerActivity extends Activity {
                 @Override
                 public void onRewardedAdLoaded() {
                     // Ad successfully loaded.
-                    Toast.makeText(WebPlayerActivity.this, "onRewardedAdLoaded", Toast.LENGTH_SHORT).show();
+                    if(BuildConfig.DEBUG) {
+                        Toast.makeText(WebPlayerActivity.this, "onRewardedAdLoaded", Toast.LENGTH_SHORT).show();
+                    }
                     WebPlayerActivity.this.isLoading = false;
                     WebPlayerActivity.this.showRewardedAd("");
                 }
@@ -224,7 +229,9 @@ public class WebPlayerActivity extends Activity {
                 @Override
                 public void onRewardedAdFailedToLoad(int errorCode) {
                     // Ad failed to load.
-                    Toast.makeText(WebPlayerActivity.this, String.format("onRewardedAdFailedToLoad => errorCode : %i", errorCode), Toast.LENGTH_SHORT).show();
+                    if(BuildConfig.DEBUG) {
+                        Toast.makeText(WebPlayerActivity.this, String.format("onRewardedAdFailedToLoad => errorCode : %i", errorCode), Toast.LENGTH_SHORT).show();
+                    }
                     WebPlayerActivity.this.isLoading = false;
                 }
             };
@@ -251,7 +258,9 @@ public class WebPlayerActivity extends Activity {
                  */
                 public void onRewardedAdOpened() {
                     // Ad opened.
-                    Toast.makeText(WebPlayerActivity.this, "onRewardedAdOpened()", Toast.LENGTH_SHORT).show();
+                    if(BuildConfig.DEBUG) {
+                        Toast.makeText(WebPlayerActivity.this, "onRewardedAdOpened()", Toast.LENGTH_SHORT).show();
+                    }
                 }
 
                 /**
@@ -260,7 +269,9 @@ public class WebPlayerActivity extends Activity {
                  */
                 public void onRewardedAdClosed() {
                     // Ad closed.
-                    Toast.makeText(WebPlayerActivity.this, "onRewardedAdClosed()", Toast.LENGTH_SHORT).show();
+                    if(BuildConfig.DEBUG) {
+                        Toast.makeText(WebPlayerActivity.this, "onRewardedAdClosed()", Toast.LENGTH_SHORT).show();
+                    }
                 }
 
                 /**
@@ -270,7 +281,9 @@ public class WebPlayerActivity extends Activity {
                  */
                 public void onUserEarnedReward(@NonNull RewardItem reward) {
                     // User earned reward.
-                    Toast.makeText(WebPlayerActivity.this, "onUserEarnedReward()", Toast.LENGTH_SHORT).show();
+                    if(BuildConfig.DEBUG) {
+                        Toast.makeText(WebPlayerActivity.this, "onUserEarnedReward()", Toast.LENGTH_SHORT).show();
+                    }
                     addCoin(reward.getAmount());
                 }
 
@@ -282,7 +295,10 @@ public class WebPlayerActivity extends Activity {
                  */
                 public void onRewardedAdFailedToShow(int errorCode) {
                     // Ad failed to display
-                    Toast.makeText(WebPlayerActivity.this, "onRewardedAdFailedToShow()", Toast.LENGTH_SHORT).show();
+                    if(BuildConfig.DEBUG) {
+                        Toast.makeText(WebPlayerActivity.this, "onRewardedAdFailedToShow()", Toast.LENGTH_SHORT).show();
+                    }
+
                 }
             };
 
@@ -300,16 +316,22 @@ public class WebPlayerActivity extends Activity {
             @Override
             public void onAdLoaded() {
                 showInterstitial();
-                Toast.makeText(WebPlayerActivity.this, "onAdLoaded()", Toast.LENGTH_SHORT).show();
+                if(BuildConfig.DEBUG) {
+                    Toast.makeText(WebPlayerActivity.this, "onAdLoaded()", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
             public void onAdFailedToLoad(int errorCode) {
-                Toast.makeText(WebPlayerActivity.this, "onAdFailedToLoad()", Toast.LENGTH_SHORT).show();
+                if(BuildConfig.DEBUG) {
+                    Toast.makeText(WebPlayerActivity.this, "onAdFailedToLoad()", Toast.LENGTH_SHORT).show();
+                }
             }
             @Override
             public void onAdClosed() {
-                Toast.makeText(WebPlayerActivity.this, "onAdClosed()", Toast.LENGTH_SHORT).show();
+                if(BuildConfig.DEBUG) {
+                    Toast.makeText(WebPlayerActivity.this, "onAdClosed()", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
