@@ -26,6 +26,16 @@ You are free to provide a translation of this tutorial with the condition that y
 Please create reports for bugs related to the project at [GitHub issues](https://github.com/AltimitSystems/mv-android-client/issues)
 Suggestions and other forms of feedback and concerns can either be posted as a GitHub issue or in the HBGames.org tutorial thread.
 
+## JavaScript API
+
+```javascript
+androidAPI.hideBannerAd();
+androidAPI.showBannerAd();
+androidAPI.showInterstitialAd();
+androidAPI.hideWebView();
+androidAPI.showWebView();
+```
+
 ## License
 
 The MV Android Client is under the [Apache License 2.0](https://github.com/AltimitSystems/mv-android-client/blob/master/LICENSE).

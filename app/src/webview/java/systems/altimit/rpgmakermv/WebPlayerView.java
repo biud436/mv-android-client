@@ -270,7 +270,7 @@ public class WebPlayerView extends WebView {
         }
 
         @android.webkit.JavascriptInterface
-        public void HideBannerAd() {
+        public void hideBannerAd() {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -280,7 +280,7 @@ public class WebPlayerView extends WebView {
         }
 
         @android.webkit.JavascriptInterface
-        public void ShowBannerAd() {
+        public void showBannerAd() {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -290,28 +290,28 @@ public class WebPlayerView extends WebView {
         }
 
         @android.webkit.JavascriptInterface
-        public void ShowInterstitialAd() {
+        public void showInterstitialAd() {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     WebPlayerActivity.WEBPLAYER_ACTIVITY.loadInterstitial();
+                    WebPlayerActivity.WEBPLAYER_ACTIVITY.showInterstitial();
                 }
             });
         }
 
         @android.webkit.JavascriptInterface
-        public void ShowRewardedAd(String callback) {
-            final String sCallback = callback;
+        public void showRewardedAd() {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    WebPlayerActivity.WEBPLAYER_ACTIVITY.showRewardedAd(sCallback);
+                    WebPlayerActivity.WEBPLAYER_ACTIVITY.showRewardedAd();
                 }
             });
         }
 
         @android.webkit.JavascriptInterface
-        public void HideWebView() {
+        public void hideWebView() {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -321,7 +321,7 @@ public class WebPlayerView extends WebView {
         }
 
         @android.webkit.JavascriptInterface
-        public void ShowWebView() {
+        public void showWebView() {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {

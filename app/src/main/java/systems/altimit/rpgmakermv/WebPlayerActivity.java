@@ -60,7 +60,7 @@ public class WebPlayerActivity extends Activity {
     private Player mPlayer;
     private AlertDialog mQuitDialog;
     private int mSystemUiVisibility;
-    public boolean isLoading;
+    public boolean mIsLoading;
 
     /**
      * 프레임 레이아웃 추가
@@ -69,9 +69,9 @@ public class WebPlayerActivity extends Activity {
     public static WebPlayerActivity WEBPLAYER_ACTIVITY = null;
     public static AdView WEBPLAYER_ADVIEW = null;
 
-    public static AdRequest mAdRequest;
-    public static InterstitialAd mInterstitialAd;
-    public static RewardedAd mRewardedAd;
+    public AdRequest mAdRequest;
+    public InterstitialAd mInterstitialAd;
+    public RewardedAd mRewardedAd;
 
     @SuppressLint("ObsoleteSdkInt")
     @Override
@@ -188,7 +188,7 @@ public class WebPlayerActivity extends Activity {
     private void loadAds() {
 
         // Reload the rewarded Ad.
-        if (!mRewardedAd.isLoaded() && !isLoading) {
+        if (!mRewardedAd.isLoaded() && !mIsLoading) {
             loadRewardedAd();
         }
 
@@ -205,7 +205,7 @@ public class WebPlayerActivity extends Activity {
 
         if(mRewardedAd == null || !mRewardedAd.isLoaded()) {
             mRewardedAd = new RewardedAd(this, getString(R.string.VideoAd));
-            isLoading = true;
+            mIsLoading = true;
 
             RewardedAdLoadCallback adLoadCallback = new RewardedAdLoadCallback() {
 
@@ -218,8 +218,8 @@ public class WebPlayerActivity extends Activity {
                     if(BuildConfig.DEBUG) {
                         Toast.makeText(WebPlayerActivity.this, "onRewardedAdLoaded", Toast.LENGTH_SHORT).show();
                     }
-                    WebPlayerActivity.this.isLoading = false;
-                    WebPlayerActivity.this.showRewardedAd("");
+                    WebPlayerActivity.this.mIsLoading = false;
+                    WebPlayerActivity.this.showRewardedAd();
                 }
 
                 /**
@@ -236,7 +236,7 @@ public class WebPlayerActivity extends Activity {
                     if(BuildConfig.DEBUG) {
                         Toast.makeText(WebPlayerActivity.this, String.format("onRewardedAdFailedToLoad => errorCode : %i", errorCode), Toast.LENGTH_SHORT).show();
                     }
-                    WebPlayerActivity.this.isLoading = false;
+                    WebPlayerActivity.this.mIsLoading = false;
                 }
             };
 
@@ -249,9 +249,7 @@ public class WebPlayerActivity extends Activity {
         mPlayer.evaluateJavascript(String.format("$gameParty.gainGold(%i);", coins));
     }
 
-    public void showRewardedAd(String successCallback) {
-
-        final String callback = successCallback;
+    public void showRewardedAd() {
 
         if (mRewardedAd.isLoaded()) {
 
