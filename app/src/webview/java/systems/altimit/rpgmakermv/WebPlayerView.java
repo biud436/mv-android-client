@@ -24,6 +24,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.View;
@@ -41,6 +42,7 @@ import android.webkit.WebViewClient;
 public class WebPlayerView extends WebView {
 
     private WebPlayer mPlayer;
+    private Handler mHandler = new Handler();
 
     public WebPlayerView(Context context) {
         super(context);
@@ -80,6 +82,7 @@ public class WebPlayerView extends WebView {
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setSupportMultipleWindows(true);
 
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             webSettings.setAllowFileAccessFromFileURLs(true);
             webSettings.setAllowUniversalAccessFromFileURLs(true);
@@ -92,6 +95,8 @@ public class WebPlayerView extends WebView {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
             webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         }
+
+        mPlayer.addJavascriptInterface(new JavascriptMethods(), "androidAPI");
 
         setWebChromeClient(new ChromeClient());
         setWebViewClient(new ViewClient());
@@ -255,6 +260,74 @@ public class WebPlayerView extends WebView {
         @Override
         public void onDestroy() {
             mWebView.destroy();
+        }
+
+    }
+
+    private final class JavascriptMethods {
+        JavascriptMethods() {
+
+        }
+
+        @android.webkit.JavascriptInterface
+        public void HideBannerAd() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    WebPlayerActivity.WEBPLAYER_ADVIEW.setVisibility(View.GONE);
+                }
+            });
+        }
+
+        @android.webkit.JavascriptInterface
+        public void ShowBannerAd() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    WebPlayerActivity.WEBPLAYER_ADVIEW.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+
+        @android.webkit.JavascriptInterface
+        public void ShowInterstitialAd() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    WebPlayerActivity.WEBPLAYER_ACTIVITY.loadInterstitial();
+                }
+            });
+        }
+
+        @android.webkit.JavascriptInterface
+        public void ShowRewardedAd(String callback) {
+            final String sCallback = callback;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    WebPlayerActivity.WEBPLAYER_ACTIVITY.showRewardedAd(sCallback);
+                }
+            });
+        }
+
+        @android.webkit.JavascriptInterface
+        public void HideWebView() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    WebPlayerView.this.setVisibility(View.GONE);
+                }
+            });
+        }
+
+        @android.webkit.JavascriptInterface
+        public void ShowWebView() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    WebPlayerView.this.setVisibility(View.VISIBLE);
+                }
+            });
         }
 
     }

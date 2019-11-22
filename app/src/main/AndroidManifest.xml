@@ -25,6 +25,10 @@
         android:allowBackup="true"
         android:fullBackupContent="true">
 
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-7949707452244334~9380799608"/>
+
         <activity
             android:name=".WebPlayerActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
@@ -45,5 +49,12 @@
             </intent-filter>
         </activity>
     </application>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
 </manifest>
