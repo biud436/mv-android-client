@@ -77,11 +77,12 @@ public class WebPlayerView extends WebView {
         webSettings.setAllowFileAccess(true);
         webSettings.setAppCacheEnabled(true);
         webSettings.setDatabaseEnabled(true);
-        webSettings.setDatabasePath(context.getDir("database", Context.MODE_PRIVATE).getPath());
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            webSettings.setDatabasePath(context.getDir("database", Context.MODE_PRIVATE).getPath());
+        }
         webSettings.setDomStorageEnabled(true);
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setSupportMultipleWindows(true);
-
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             webSettings.setAllowFileAccessFromFileURLs(true);
