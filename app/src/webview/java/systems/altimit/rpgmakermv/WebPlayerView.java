@@ -296,7 +296,6 @@ public class WebPlayerView extends WebView {
                 @Override
                 public void run() {
                     WebPlayerActivity.WEBPLAYER_ACTIVITY.loadInterstitial();
-                    WebPlayerActivity.WEBPLAYER_ACTIVITY.showInterstitial();
                 }
             });
         }

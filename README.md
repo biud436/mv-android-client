@@ -29,10 +29,18 @@ Suggestions and other forms of feedback and concerns can either be posted as a G
 ## JavaScript API
 
 ```javascript
+// 배너 광고를 숨깁니다.
 androidAPI.hideBannerAd();
+
+// 배너 광고를 표시합니다.
 androidAPI.showBannerAd();
+
+// 전면 광고를 표시합니다.
 androidAPI.showInterstitialAd();
+
+// 보상형 광고를 표시합니다.
 androidAPI.showRewardedAd();
+
 androidAPI.hideWebView();
 androidAPI.showWebView();
 ```

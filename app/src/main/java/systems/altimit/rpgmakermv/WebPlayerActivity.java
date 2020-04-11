@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
+import android.opengl.Visibility;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -36,6 +37,8 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
@@ -43,12 +46,15 @@ import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdCallback;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+
+import static com.google.android.gms.ads.AdRequest.ERROR_CODE_NETWORK_ERROR;
 
 /**
  * Created by felixjones on 28/04/2017.
@@ -60,7 +66,6 @@ public class WebPlayerActivity extends Activity {
     private Player mPlayer;
     private AlertDialog mQuitDialog;
     private int mSystemUiVisibility;
-    public boolean mIsLoading;
 
     /**
      * 프레임 레이아웃 추가
@@ -114,14 +119,14 @@ public class WebPlayerActivity extends Activity {
             mPlayer.loadUrl(projectURIBuilder.build().toString());
         }
 
-        // Initialize AdMob.
+        // 애드몹을 초기화합니다.
         init();
-
-        // Reload Ads.
-        loadAds();
 
     }
 
+    /**
+     * 애드몹을 초기화합니다.
+     */
     public void init() {
 
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
@@ -130,8 +135,6 @@ public class WebPlayerActivity extends Activity {
 
             }
         });
-
-        loadRewardedAd();
 
         WEBPLAYER_ACTIVITY = this;
 
@@ -149,6 +152,7 @@ public class WebPlayerActivity extends Activity {
         FrameLayout.LayoutParams webViewLayoutParams = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT);
+
         // 프레임 레이아웃에 웹뷰를 추가한다.
         ROOT_LAYOUT.addView(mPlayer.getView(), webViewLayoutParams);
 
@@ -159,119 +163,119 @@ public class WebPlayerActivity extends Activity {
         // 광고의 위치를 화면 하단으로 설정한다.
         adViewLayoutParams.gravity = Gravity.BOTTOM;
 
-        // 애드몹을 초기화한다.
+        // 디버그 모드라면 테스트 광고가 나오게 합니다.
+        List<String> testDevices = new ArrayList<>();
+        testDevices.add(AdRequest.DEVICE_ID_EMULATOR);
+
+        RequestConfiguration.Builder requestConfigurationBuilder = new RequestConfiguration.Builder();
+
+        if(BuildConfig.DEBUG) {
+            requestConfigurationBuilder.setTestDeviceIds(testDevices);
+        }
+
+        RequestConfiguration requestConfiguration = requestConfigurationBuilder.build();
+
+        MobileAds.setRequestConfiguration(requestConfiguration);
+
+        // 애드몹을 초기화합니다.
         WEBPLAYER_ADVIEW = null;
         WEBPLAYER_ADVIEW = new AdView(this);
         WEBPLAYER_ADVIEW.setLayoutParams(adViewLayoutParams);
         WEBPLAYER_ADVIEW.setAdSize(AdSize.BANNER);
         WEBPLAYER_ADVIEW.setAdUnitId(getString(R.string.BannerAd));
 
-        mAdRequest = new AdRequest.Builder()
-                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                .build();
+        mAdRequest = new AdRequest.Builder().build();
 
         // 애드몹이 화면에서 가려진 상태로 생성된다.
-        WEBPLAYER_ADVIEW.setVisibility(View.VISIBLE);
+        WEBPLAYER_ADVIEW.setVisibility(View.INVISIBLE);
 
         WEBPLAYER_ADVIEW.loadAd(mAdRequest);
 
         // 프레임 레이아웃에 애드몹을 추가한다.
         ROOT_LAYOUT.addView(WEBPLAYER_ADVIEW);
 
-        mInterstitialAd = newInterstitialAd();
-        loadInterstitial();
-
         setContentView(ROOT_LAYOUT);
 
-    }
+        // 전면 광고를 생성합니다.
+        mInterstitialAd = initWithInterstitialAd();
 
-    private void loadAds() {
-
-        // Reload the rewarded Ad.
-        if (!mRewardedAd.isLoaded() && !mIsLoading) {
-            loadRewardedAd();
-        }
-
-        // Reload the interstitial Ad.
-        if(BuildConfig.LOAD_INTERSTITIAL_AD) {
-            if(!mInterstitialAd.isLoading() && !mInterstitialAd.isLoaded()) {
-                mInterstitialAd.loadAd(new AdRequest.Builder().build());
-            }
-        }
-
-    }
-
-    private void loadRewardedAd() {
-
-        if(mRewardedAd == null || !mRewardedAd.isLoaded()) {
-            mRewardedAd = new RewardedAd(this, getString(R.string.VideoAd));
-            mIsLoading = true;
-
-            RewardedAdLoadCallback adLoadCallback = new RewardedAdLoadCallback() {
-
-                /**
-                 * 	이 메소드는 광고 로드가 완료되면 실행됩니다.
-                 */
-                @Override
-                public void onRewardedAdLoaded() {
-                    // Ad successfully loaded.
-                    if(BuildConfig.DEBUG) {
-                        Toast.makeText(WebPlayerActivity.this, "onRewardedAdLoaded", Toast.LENGTH_SHORT).show();
-                    }
-                    WebPlayerActivity.this.mIsLoading = false;
-                    WebPlayerActivity.this.showRewardedAd();
-                }
-
-                /**
-                 * 이 메소드는 광고 로드에 실패할 때 실행됩니다. 이 메소드에는 발생한 오류 유형을 나타내는 errorCode 매개변수가 포함됩니다. 가능한 값이 AdRequest 클래스의 상수로 정의됩니다.
-                 * ERROR_CODE_INTERNAL_ERROR: 광고 서버에서 잘못된 응답을 받는 등 내부적으로 오류가 발생했다는 의미입니다.
-                 * ERROR_CODE_INVALID_REQUEST: 광고 단위 ID가 잘못된 경우처럼 광고 요청이 잘못되었다는 의미입니다.
-                 * ERROR_CODE_NETWORK_ERROR: 네트워크 연결로 인해 광고 요청에 성공하지 못했다는 의미입니다.
-                 * ERROR_CODE_NO_FILL: 광고 요청에는 성공했지만 광고 인벤토리의 부족으로 광고가 반환되지 않았다는 의미입니다.
-                 * @param errorCode
-                 */
-                @Override
-                public void onRewardedAdFailedToLoad(int errorCode) {
-                    // Ad failed to load.
-                    if(BuildConfig.DEBUG) {
-                        Toast.makeText(WebPlayerActivity.this, String.format("onRewardedAdFailedToLoad => errorCode : %i", errorCode), Toast.LENGTH_SHORT).show();
-                    }
-                    WebPlayerActivity.this.mIsLoading = false;
-                }
-            };
-
-            mRewardedAd.loadAd(new AdRequest.Builder().build(), adLoadCallback);
-        }
+        // 보상형 광고를 생성합니다.
+        mRewardedAd = initWithRewardedAd();
 
     }
 
     private void addCoin(int coins) {
-        mPlayer.evaluateJavascript(String.format("$gameParty.gainGold(%i);", coins));
+        mPlayer.evaluateJavascript(String.format("if($gameParty) { $gameParty.gainGold(%i); }", coins));
     }
 
+    /**
+     * 이 메소드는 보상형 광고 인스턴스를 생성합니다.
+     * 그러나 광고를 로드하거나 화면에 띄우진 않습니다.
+     */
+    public RewardedAd initWithRewardedAd() {
+        RewardedAd rewardedAd = new RewardedAd(this, getString(R.string.VideoAd));
+
+        RewardedAdLoadCallback adLoadCallback = new RewardedAdLoadCallback() {
+
+            /**
+             * 	이 메소드는 광고 로드가 완료되면 실행됩니다.
+             */
+            @Override
+            public void onRewardedAdLoaded() {
+
+                // 디버그 모드로 빌드 되었을 때, 다음 토스트를 화면에 띄웁니다.
+                if(BuildConfig.DEBUG) {
+                    Toast.makeText(WebPlayerActivity.this, "onRewardedAdLoaded", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+            /**
+             * 이 메소드는 광고 로드에 실패할 때 실행됩니다. 이 메소드에는 발생한 오류 유형을 나타내는 errorCode 매개변수가 포함됩니다. 가능한 값이 AdRequest 클래스의 상수로 정의됩니다.
+             * ERROR_CODE_INTERNAL_ERROR: 광고 서버에서 잘못된 응답을 받는 등 내부적으로 오류가 발생했다는 의미입니다.
+             * ERROR_CODE_INVALID_REQUEST: 광고 단위 ID가 잘못된 경우처럼 광고 요청이 잘못되었다는 의미입니다.
+             * ERROR_CODE_NETWORK_ERROR: 네트워크 연결로 인해 광고 요청에 성공하지 못했다는 의미입니다.
+             * ERROR_CODE_NO_FILL: 광고 요청에는 성공했지만 광고 인벤토리의 부족으로 광고가 반환되지 않았다는 의미입니다.
+             * @param errorCode
+             */
+            @Override
+            public void onRewardedAdFailedToLoad(int errorCode) {
+                // 디버그 모드로 빌드 되었을 때, 다음 토스트를 화면에 띄웁니다.
+                if(BuildConfig.DEBUG) {
+                    Toast.makeText(WebPlayerActivity.this, String.format("onRewardedAdFailedToLoad => errorCode : %i", errorCode), Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+        rewardedAd.loadAd(new AdRequest.Builder().build(), adLoadCallback);
+
+        return rewardedAd;
+    }
+
+    /**
+     * 보상형 광고를 화면에 띄웁니다.
+     */
     public void showRewardedAd() {
 
-        if (mRewardedAd.isLoaded()) {
-
-            RewardedAdCallback adCallback = new RewardedAdCallback() {
+        if(mRewardedAd.isLoaded()) {
+            mRewardedAd.show(this, new RewardedAdCallback() {
 
                 /**
                  * 이 메소드는 광고가 표시될 때 실행되며 기기 화면을 덮습니다.
                  */
                 public void onRewardedAdOpened() {
-                    // Ad opened.
-                    if(BuildConfig.DEBUG) {
+                    // 디버그 모드로 빌드 되었을 때, 다음 토스트를 화면에 띄웁니다.
+                    ROOT_LAYOUT.setVisibility(View.GONE);
+                    if (BuildConfig.DEBUG) {
                         Toast.makeText(WebPlayerActivity.this, "onRewardedAdOpened()", Toast.LENGTH_SHORT).show();
                     }
                 }
 
-                /**
-                 * 이 메소드는 사용자가 닫기 아이콘을 탭하거나 뒤로 버튼을 사용하여 보상형 광고를 닫을 때 실행됩니다.
-                 * 앱에서 오디오 출력 또는 게임 루프를 일시중지했을 때 이 메소드로 재개하면 편리합니다.
-                 */
                 public void onRewardedAdClosed() {
-                    // Ad closed.
-                    if(BuildConfig.DEBUG) {
+                    ROOT_LAYOUT.setVisibility(View.VISIBLE);
+                    mRewardedAd = initWithRewardedAd();
+
+                    // 디버그 모드로 빌드 되었을 때, 다음 토스트를 화면에 띄웁니다.
+                    if (BuildConfig.DEBUG) {
                         Toast.makeText(WebPlayerActivity.this, "onRewardedAdClosed()", Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -279,13 +283,15 @@ public class WebPlayerActivity extends Activity {
                 /**
                  * 이 메소드는 사용자가 광고와 상호작용하여 보상을 받아야 할 때 실행됩니다.
                  * 광고 단위에 대해 설정된 보상 관련 세부정보는 RewardItem 매개변수의 getType() 및 getAmount() 메소드를 통해 액세스할 수 있습니다.
+                 *
                  * @param reward
                  */
                 public void onUserEarnedReward(@NonNull RewardItem reward) {
-                    // User earned reward.
-                    if(BuildConfig.DEBUG) {
+                    // 디버그 모드로 빌드 되었을 때, 다음 토스트를 화면에 띄웁니다.
+                    if (BuildConfig.DEBUG) {
                         Toast.makeText(WebPlayerActivity.this, "onUserEarnedReward()", Toast.LENGTH_SHORT).show();
                     }
+                    // 게임 내 골드를 취득합니다.
                     addCoin(reward.getAmount());
                 }
 
@@ -293,31 +299,42 @@ public class WebPlayerActivity extends Activity {
                  * 이 메소드는 광고 표시에 실패할 때 실행됩니다.
                  * 이 메소드에는 발생한 오류 유형을 나타내는 errorCode 매개변수가 포함됩니다.
                  * 가능한 값이 RewardedAdCallback 클래스의 상수로 정의됩니다.
+                 *
                  * @param errorCode
                  */
                 public void onRewardedAdFailedToShow(int errorCode) {
-                    // Ad failed to display
-                    if(BuildConfig.DEBUG) {
-                        Toast.makeText(WebPlayerActivity.this, "onRewardedAdFailedToShow()", Toast.LENGTH_SHORT).show();
+                    switch(errorCode) {
+                        case AdRequest.ERROR_CODE_NETWORK_ERROR:
+                            if (BuildConfig.DEBUG) Toast.makeText(WebPlayerActivity.this, "onRewardedAdFailedToShow:ERROR_CODE_NETWORK_ERROR", Toast.LENGTH_SHORT).show();
+                            break;
+                        case AdRequest.ERROR_CODE_INTERNAL_ERROR:
+                            if (BuildConfig.DEBUG) Toast.makeText(WebPlayerActivity.this, "onRewardedAdFailedToShow:ERROR_CODE_INTERNAL_ERROR", Toast.LENGTH_SHORT).show();
+                            break;
+                        case AdRequest.ERROR_CODE_INVALID_REQUEST:
+                            if (BuildConfig.DEBUG) Toast.makeText(WebPlayerActivity.this, "onRewardedAdFailedToShow:ERROR_CODE_INVALID_REQUEST", Toast.LENGTH_SHORT).show();
+                            break;
+                        case AdRequest.ERROR_CODE_NO_FILL:
+                            if (BuildConfig.DEBUG) Toast.makeText(WebPlayerActivity.this, "onRewardedAdFailedToShow:ERROR_CODE_NO_FILL", Toast.LENGTH_SHORT).show();
+                            break;
                     }
-
                 }
-            };
-
-            mRewardedAd.show(this, adCallback);
-
-        } else {
-            loadRewardedAd();
+            });
         }
     }
 
-    private InterstitialAd newInterstitialAd() {
+    private InterstitialAd initWithInterstitialAd() {
         InterstitialAd interstitialAd = new InterstitialAd(this);
         interstitialAd.setAdUnitId(getString(R.string.InterstitialAd));
         interstitialAd.setAdListener(new AdListener() {
+
             @Override
             public void onAdLoaded() {
-                showInterstitial();
+                ROOT_LAYOUT.setVisibility(View.GONE);
+                // 전면 광고를 띄웁니다.
+                if(mInterstitialAd.isLoaded())
+                    mInterstitialAd.show();
+
+                // 디버그 모드일 때 토스트를 화면에 띄웁니다.
                 if(BuildConfig.DEBUG) {
                     Toast.makeText(WebPlayerActivity.this, "onAdLoaded()", Toast.LENGTH_SHORT).show();
                 }
@@ -325,15 +342,19 @@ public class WebPlayerActivity extends Activity {
 
             @Override
             public void onAdFailedToLoad(int errorCode) {
+                // 디버그 모드일 때 토스트를 화면에 띄웁니다.
                 if(BuildConfig.DEBUG) {
                     Toast.makeText(WebPlayerActivity.this, "onAdFailedToLoad()", Toast.LENGTH_SHORT).show();
                 }
             }
             @Override
             public void onAdClosed() {
+                ROOT_LAYOUT.setVisibility(View.VISIBLE);
+                // 디버그 모드일 때 토스트를 화면에 띄웁니다.
                 if(BuildConfig.DEBUG) {
                     Toast.makeText(WebPlayerActivity.this, "onAdClosed()", Toast.LENGTH_SHORT).show();
                 }
+
             }
         });
 
@@ -342,18 +363,7 @@ public class WebPlayerActivity extends Activity {
     }
 
     public void loadInterstitial() {
-        if(!mInterstitialAd.isLoaded()) {
-            AdRequest adRequest = new AdRequest.Builder().build();
-            mInterstitialAd.loadAd(adRequest);
-        }
-    }
-
-    public void showInterstitial() {
-        if ( mInterstitialAd != null && mInterstitialAd.isLoaded() ) {
-            mInterstitialAd.show();
-        } else {
-            loadInterstitial();
-        }
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
     }
 
     @Override
