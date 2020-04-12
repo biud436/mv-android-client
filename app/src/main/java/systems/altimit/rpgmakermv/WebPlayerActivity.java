@@ -191,16 +191,19 @@ public class WebPlayerActivity extends Activity {
 
         WEBPLAYER_ADVIEW.loadAd(mAdRequest);
 
+        setContentView(ROOT_LAYOUT);
+
         // 프레임 레이아웃에 애드몹을 추가한다.
         ROOT_LAYOUT.addView(WEBPLAYER_ADVIEW);
-
-        setContentView(ROOT_LAYOUT);
+        ROOT_LAYOUT.bringToFront();
+        ROOT_LAYOUT.requestLayout();
 
         // 전면 광고를 생성합니다.
         mInterstitialAd = initWithInterstitialAd();
 
         // 보상형 광고를 생성합니다.
         mRewardedAd = initWithRewardedAd();
+
 
     }
 
@@ -264,14 +267,12 @@ public class WebPlayerActivity extends Activity {
                  */
                 public void onRewardedAdOpened() {
                     // 디버그 모드로 빌드 되었을 때, 다음 토스트를 화면에 띄웁니다.
-                    ROOT_LAYOUT.setVisibility(View.GONE);
                     if (BuildConfig.DEBUG) {
                         Toast.makeText(WebPlayerActivity.this, "onRewardedAdOpened()", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 public void onRewardedAdClosed() {
-                    ROOT_LAYOUT.setVisibility(View.VISIBLE);
                     mRewardedAd = initWithRewardedAd();
 
                     // 디버그 모드로 빌드 되었을 때, 다음 토스트를 화면에 띄웁니다.
@@ -319,17 +320,24 @@ public class WebPlayerActivity extends Activity {
                     }
                 }
             });
+        } else {
+
         }
     }
 
+    /**
+     * 전면 광고를 생성합니다.
+     * 현재 모바일 SDK가 프레임 레이아웃과의 버그로 인해 클릭이 되지 않는 문제가 있습니다.
+     * @return
+     */
     private InterstitialAd initWithInterstitialAd() {
         InterstitialAd interstitialAd = new InterstitialAd(this);
         interstitialAd.setAdUnitId(getString(R.string.InterstitialAd));
+
         interstitialAd.setAdListener(new AdListener() {
 
             @Override
             public void onAdLoaded() {
-                ROOT_LAYOUT.setVisibility(View.GONE);
                 // 전면 광고를 띄웁니다.
                 if(mInterstitialAd.isLoaded())
                     mInterstitialAd.show();
@@ -349,7 +357,6 @@ public class WebPlayerActivity extends Activity {
             }
             @Override
             public void onAdClosed() {
-                ROOT_LAYOUT.setVisibility(View.VISIBLE);
                 // 디버그 모드일 때 토스트를 화면에 띄웁니다.
                 if(BuildConfig.DEBUG) {
                     Toast.makeText(WebPlayerActivity.this, "onAdClosed()", Toast.LENGTH_SHORT).show();
@@ -391,13 +398,14 @@ public class WebPlayerActivity extends Activity {
 
     @Override
     protected void onPause() {
-        mPlayer.pauseTimers();
+
+        // 2020.04.12
+        // pauseTimers();는 웹뷰 뿐만 아니라 전역에 적용되므로
+        // 아래 구문이 있으면 광고를 클릭할 수 없게 됩니다.
+        // link : https://stackoverflow.com/a/54371919
+        // mPlayer.pauseTimers();
+
         mPlayer.onHide();
-
-        if(WEBPLAYER_ADVIEW != null) {
-            WEBPLAYER_ADVIEW.pause();
-        }
-
         super.onPause();
     }
 
@@ -406,11 +414,8 @@ public class WebPlayerActivity extends Activity {
         super.onResume();
         getWindow().getDecorView().setSystemUiVisibility(mSystemUiVisibility);
         if (mPlayer != null) {
-            mPlayer.resumeTimers();
+            // mPlayer.resumeTimers();
             mPlayer.onShow();
-        }
-        if(WEBPLAYER_ADVIEW != null) {
-            WEBPLAYER_ADVIEW.resume();
         }
     }
 
