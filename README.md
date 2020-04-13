@@ -26,23 +26,34 @@ You are free to provide a translation of this tutorial with the condition that y
 Please create reports for bugs related to the project at [GitHub issues](https://github.com/AltimitSystems/mv-android-client/issues)
 Suggestions and other forms of feedback and concerns can either be posted as a GitHub issue or in the HBGames.org tutorial thread.
 
-## JavaScript API
+## Integration Google Mobile Ads Steps
+To Integrate Google Mobile Ads, First up you need to open the file at ```res/values/values.xml``` and then change values of elements such as ```BannerAd```, ```InterstitialAd```, ```VideoAd```. 
+
+They must be the same as your own AdMob settings. Note that the default is a test id.
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!-- ... -->
+    <string name="BannerAd">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="InterstitialAd">ca-app-pub-3940256099942544/1033173712</string>
+    <string name="VideoAd">ca-app-pub-3940256099942544/5224354917</string>
+<!-- ... -->
+</resources>
+```
+
+if you need to show up the smart banner ads on the bottom of the screen, You must call the script command. its' default visibility is to false.
 
 ```javascript
-// 배너 광고를 숨깁니다.
 androidAPI.hideBannerAd();
-
-// 배너 광고를 표시합니다.
 androidAPI.showBannerAd();
+```
 
-// 전면 광고를 표시합니다.
+if you need to show up the ```InterstitialAd``` or ```RewardedAd``` on the game screen, try below script command. In case of ```RewaredAd```, Finishing the ads give a rewarded gold to player. However, there is no separate server verification system.
+
+```javascript
 androidAPI.showInterstitialAd();
-
-// 보상형 광고를 표시합니다.
 androidAPI.showRewardedAd();
-
-androidAPI.hideWebView();
-androidAPI.showWebView();
 ```
 
 ## License
